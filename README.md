@@ -2,7 +2,6 @@
 
 A Power BI portfolio project exploring London Underground station entries and exits from **2007 to 2021**, using Transport for London (TfL) open data.
 
-![London Underground Dashboard]("C:\Users\vbpan\Downloads\ChatGPT Image Sep 14, 2026, 11_29_52 AM.png")
 
 ## Project Overview
 
