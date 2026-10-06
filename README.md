@@ -1,81 +1,80 @@
-# London Underground Power BI Dashboard
+# London Underground Station Analysis
 
-A Power BI portfolio project exploring London Underground station entries and exits from **2007 to 2021**, using Transport for London (TfL) open data.
+A transport-data portfolio project exploring station entries and exits using TfL annual-count workbooks. The corrected analysis uses **2007–2017 historical sheets** and **2021 London Underground-only records**.
 
+## Dashboard preview
 
-## Project Overview
+![London Underground station analysis](London_Underground_Dashboard.png)
 
-The goal of this project is to turn historic London Underground station usage data into a clear, interactive dashboard that highlights long-term passenger trends, the busiest stations, geographic patterns and station distribution across the network.
+[Download the dashboard PDF](London_Underground_Dashboard.pdf)
 
-The dashboard is designed to demonstrate practical data-analysis skills including data preparation, KPI design, trend analysis, ranking, geographic visualisation and business-focused storytelling in Power BI.
+This repository originated as a Power BI portfolio project. **The current PNG and PDF are static previews regenerated with Python/Matplotlib from the included source workbooks.** They do not contain working filters. No editable Power BI `.pbix` or `.pbip` model is included, so the original DAX and report interactions cannot be inspected here.
 
-## Dashboard Highlights
+## Verified 2021 findings
 
-- **24.72B** total station entries and exits across 2007–2021
-- **1.77B** average annual entries and exits
-- **Stratford** was the busiest station in 2021 with **63.44M** entries and exits
-- **270** London Underground stations represented in the station dataset
-- Passenger activity increased through 2019 before falling sharply in 2020 during the COVID-19 period
-- 2021 showed a partial recovery compared with 2020
+| Measure | Result | Definition |
+|---|---:|---|
+| Annualised station entries + exits | **1,180,585,837.77** | Sum of `En/Ex` where `Mode = LU` |
+| Underground stations | **270** | Distinct NLC identifiers in the LU subset |
+| Busiest Underground station | **King's Cross St. Pancras** | Highest LU-only annualised station count |
+| Busiest station count | **36,734,085.14** | Annualised entries + exits |
+| Stratford LU-only count | **29,106,619.05** | LU row only; other modes excluded |
 
-## Dashboard Features
+**Business takeaway:** Station rankings can help identify locations to investigate for capacity and service planning. These annualised figures alone do not establish platform crowding, peak-hour demand or required staffing levels.
 
-The dashboard includes:
+The verified historical totals generally rise across 2007–2016, with a small decline in 2017. Coverage and estimation methods vary; the chart should not be read as a like-for-like panel of identical stations.
 
-- Year, station, line, zone, network type and Night Tube filters
-- Total entries and exits KPI
-- Average annual entries KPI
-- Busiest station KPI
-- Total stations KPI
-- Entries and exits trend from 2007–2021
-- Top 5 and Top 10 station rankings
-- Station distribution by zone
-- Geographic station activity map
-- Key insight cards summarising the main findings
+## Source selection and important corrections
 
-## Tools & Skills
+The original preview mixed incompatible figures. The corrected version follows the original workbooks:
 
-- **Power BI** – dashboard design and visualisation
-- **Power Query** – data cleaning and transformation
-- **DAX** – measures and KPI calculations
-- **Excel / CSV** – source data handling
-- **Data Modelling** – joining station, usage and geographic data
-- **Data Storytelling** – translating transport data into clear insights
+- **2021:** Read the `Annualised` sheet in `AC2021_AnnualisedEntryExit.xlsx`, filter `Mode = LU`, and use the published `En/Ex` field without multiplying it again.
+- **2007–2017:** Read each annual sheet in `multi-year-station-entry-and-exit-figures.xls`. Keep station rows with numeric NLC identifiers and numeric values in the annual-total column. Convert the published millions to counts. Exclude headings and total/footer rows.
+- **2018–2020:** These years are present in the derived `TfL_stations.csv`, but their original annual-count workbooks are not supplied. The derived CSV combines modes at some interchanges, so these years are omitted from the corrected preview rather than silently treated as LU-only. The chart shows a gap, not zeros or interpolation.
+- The previous **24.72B total**, **1.77B average**, station ranking and zone shares have been removed from the current preview because they did not reconcile with the selected sources.
+- Stratford's previous **63.44M** figure combines LU, Overground, DLR and TfL Rail rows in the 2021 workbook. It is not an Underground-only station figure.
 
-## Repository Structure
+## Metric definitions and limitations
 
-```text
-London_Underground_PowerBI_Dashboard/
-├── data/
-│   ├── multi-year-station-entry-and-exit-figures.xlsx
-│   ├── AC2021_AnnualisedEntryExit.xlsx
-│   ├── TfL_stations.csv
-│   ├── Stations_20220221.csv
-│   ├── lu_lines.geojson
-│   └── night_tube.geojson
-├── images/
-│   └── london-underground-dashboard.png
-└── README.md
+- **Entries + exits** are station movements, not unique passengers or unique journeys. A journey can contribute an entry at one station and an exit at another.
+- The workbook notes describe annualisation from typical-day counts and associated factors. These are not a simple count of every passenger event during a calendar year.
+- The historical workbook and the 2021 workbook use different source structures and annualisation conventions. Avoid interpreting their difference as a precise like-for-like percentage change.
+- Station coverage changes by year. The reproduction outputs include the number of contributing station rows for each year.
+- The old combined CSV and geographic files are retained as source material, but they do not control the revised totals or rankings. The revised preview does not claim verified zone or geographic analyses.
+
+## Data sources
+
+- [TfL open-data information](https://tfl.gov.uk/info-for/open-data-users/our-open-data)
+- [TfL crowding and annual-count data portal](https://crowding.data.tfl.gov.uk/)
+- [Historical annual workbook](multi-year-station-entry-and-exit-figures.xls)
+- [2021 annualised workbook](AC2021_AnnualisedEntryExit.xlsx)
+
+The calculations use the exact workbook copies in this repository. Retain TfL attribution and consult the publisher's reuse terms when redistributing source data.
+
+## Reproduce the preview
+
+```bash
+python -m pip install -r requirements.txt
+python rebuild_preview.py
 ```
 
-## Data Source
+The script reads the workbooks, checks station-ID uniqueness, writes the verified tables and rebuilds the PNG/PDF. It requires no Power BI installation.
 
-Source data: **Transport for London (TfL) Open Data / London Underground station entry and exit data**.
+## Repository files
 
-The repository includes the source files used for the portfolio analysis. Please refer to TfL's data terms and conditions when reusing or redistributing the data.
+| File | Purpose |
+|---|---|
+| `London_Underground_Dashboard.png` / `.pdf` | Corrected static preview |
+| `rebuild_preview.py` / `requirements.txt` | Reproducible calculations and rendering |
+| `verified_annual_totals.csv` | Annual totals and contributing station counts |
+| `verified_2021_stations.csv` | Full LU-only 2021 station ranking |
+| `multi-year-station-entry-and-exit-figures.xls` | Original 2007–2017 workbook |
+| `AC2021_AnnualisedEntryExit.xlsx` | Original 2021 workbook, including source notes |
+| `TfL_stations.csv` | Legacy combined dataset; not used for corrected totals |
+| `Stations_20220221.csv`, `lu_lines.geojson`, `night_tube.geojson` | Supporting geographic files |
 
-## Key Insights
+## Skills demonstrated
 
-1. Underground station activity generally increased between 2007 and 2019.
-2. Usage fell substantially in 2020, reflecting the impact of the COVID-19 pandemic on travel.
-3. 2021 showed a recovery from 2020 levels, although activity remained below 2019.
-4. Stratford recorded the highest station entries and exits in 2021.
-5. Central London and major interchange stations account for many of the network's highest passenger volumes.
+Data validation · Excel data extraction · Metric definitions · Ranking · Time-series presentation · Reproducible Python analysis · Data storytelling
 
-## About This Project
-
-This project was created as part of my data analytics portfolio to demonstrate how Power BI can be used to analyse real-world public transport data and communicate useful insights through an accessible dashboard.
-
----
-
-If you found this project useful, feel free to star the repository or connect with me on LinkedIn.
+**Vaibhav Panchal**
